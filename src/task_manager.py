@@ -12,7 +12,7 @@ TASKS_FILE = 'tasks.json'
 class TaskManager:
     def __init__(self, file_name: str = TASKS_FILE):
         self.file_name: str = file_name
-        self.tasks = None
+        self.tasks = []
         self.task_types = ["command", "reminder", "meeting"]
 
     def load_tasks(self, file_path):
@@ -24,14 +24,13 @@ class TaskManager:
         except FileNotFoundError as exc:
             raise exceptions.FileNotFound(f"File not found: {file_path}") from exc
 
-    def add_task(self, description : str, due_date : str, task_type : str, command=None):
-        if task_type not in self.task_types:
+    def add_task(self, task: Task, command=None):
+        if task.task_type not in self.task_types:
             raise exceptions.TaskException("Invalid task type")
 
-        if task_type == "command" and command is None:
+        if task.task_type == "command" and command is None:
             raise exceptions.CommandException("Command task must have a command")
 
-        task = Task(description, due_date, task_type, command)
         self.tasks.append(task)
 
     def complete_task(self, task_index):
@@ -46,6 +45,6 @@ class TaskManager:
     def get_finished_tasks(self):
         return [task for task in self.tasks if task.completed]
 
-    def save_tasks(self, file_path):
+    def save_tasks(self):
         with open(self.file_name, "w") as f:
             json.dump([task.to_dict() for task in self.tasks], f,  indent=4)
